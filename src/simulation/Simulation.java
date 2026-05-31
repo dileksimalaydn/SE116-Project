@@ -23,11 +23,17 @@ public class Simulation {
     }
 
     // verilen tick sayisi kadar calistirir
-    public void run(int tickCount) {
-        for (int i = 0; i < tickCount; i++) {
-            runOneTick();
-        }
+   public void run(int tickCount) {
+    for (int i = 0; i < tickCount; i++) {
+
+        runOneTick();
+
+        SimulationPrinter.printTick(
+                grid,
+                currentTick
+        );
     }
+}
 
     // Tek bir tick calistirir
     public void runOneTick() {
