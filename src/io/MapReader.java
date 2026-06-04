@@ -17,55 +17,42 @@ import simulation.Grid;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
-//Harita dosyasini okuyor ve Grid nesnesine çeviriyor
+// Harita dosyasini okuyor ve Grid nesnesine çeviriyor
 public class MapReader {
 
     public static Grid readMap(String filename) throws IOException {
 
         BufferedReader reader = new BufferedReader(new FileReader(filename));
+        List<String> rowDataList = new ArrayList<>();
 
-        String firstLine = reader.readLine();
-
-        if (firstLine == null) {
-            reader.close();
-            throw new IOException("The map file is empty!!");
+        String line;
+        while ((line = reader.readLine()) != null) {
+            if (line.trim().isEmpty()) continue;
+            String[] parts = line.trim().split("\\s+");
+            String rowData = (parts.length >= 2 && Character.isDigit(parts[0].charAt(0))) ? parts[1] : parts[0];
+            rowDataList.add(rowData);
         }
+        reader.close();
 
-        String[] sizes = firstLine.trim().split("\\s+");
-
-        int rows = Integer.parseInt(sizes[0]);
-        int cols = Integer.parseInt(sizes[1]);
-
+        int rows = rowDataList.size();
+        int cols = rowDataList.get(0).length();
         Cell[][] cells = new Cell[rows][cols];
 
+        // Her satırdaki her karakteri hücreye dönüştürüyoruz
         for (int r = 0; r < rows; r++) {
-
-            String line = reader.readLine();
-
-            if (line == null) {
-                reader.close();
-                throw new IOException("There are missing rows on the map!");
-            }
-
-            String[] symbols = line.trim().split("\\s+");
-
-            if (symbols.length < cols) {
-                reader.close();
-                throw new IOException("There are missing columns on the map!");
-            }
-
+            String rowData = rowDataList.get(r);
             for (int c = 0; c < cols; c++) {
-                cells[r][c] = createCell(symbols[c], r, c);
+                cells[r][c] = createCell(String.valueOf(rowData.charAt(c)), r, c);
             }
         }
-
-        reader.close();
 
         return new Grid(rows, cols, cells);
     }
-  //switch-case ile sembole bakıyor ve ona uygun hücre nesnesi oluşturuyor
 
+    // switch-case ile sembole bakıyor ve ona uygun hücre nesnesi oluşturuyor
     private static Cell createCell(String symbol, int row, int col) {
 
         symbol = symbol.toUpperCase();
@@ -98,7 +85,6 @@ public class MapReader {
                 return new EmptyCell(row, col);
 
             default:
-                System.out.println("Unknown symbol:\n" + symbol);
                 return new EmptyCell(row, col);
         }
     }

@@ -26,6 +26,10 @@ public abstract class Zone extends Cell {
     // Son tick'teki uretim miktari.
     protected int lastTickOutput;
 
+    public int getLastTickOutput() {
+        return lastTickOutput;
+    }
+
     public Zone(int row, int col) {
         super(row, col);
         this.level = 0;

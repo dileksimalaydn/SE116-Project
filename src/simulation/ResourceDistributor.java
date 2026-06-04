@@ -5,8 +5,7 @@ import model.zone.Housing;
 import model.zone.Industrial;
 import model.zone.Commercial;
 
-import java.util.List;
-
+// Önceki tick'te üretilen kaynakları zone'lara eşit olarak dağıtıyor
 public class ResourceDistributor {
 
     public static void distribute(Grid grid) {
@@ -14,67 +13,48 @@ public class ResourceDistributor {
         int totalGoodsPool = 0;
         int totalLifestylePool = 0;
 
-        // Haritadaki tüm zone'ların ürettiği kaynakları havuzda toplar
+        // Önceki tick'teki üretimleri topluyoruz
         for (Zone zone : grid.getAllZones()) {
-            totalPopulationPool += zone.getPopulationProduced();
-            totalGoodsPool += zone.getGoodsProduced();
-            totalLifestylePool += zone.getLifestyleProduced();
+            if (zone instanceof Housing) {
+                totalPopulationPool += zone.getLastTickOutput();
+            } else if (zone instanceof Industrial) {
+                totalGoodsPool += zone.getLastTickOutput();
+            } else if (zone instanceof Commercial) {
+                totalLifestylePool += zone.getLastTickOutput();
+            }
         }
 
-        List<Industrial> industrialZones = grid.getIndustrialZones();
-        List<Commercial> commercialZones = grid.getCommercialZones();
-        List<Housing> housingZones = grid.getHousingZones();
+        int numPopReceivers = grid.getIndustrialZones().size() + grid.getCommercialZones().size();
+        int numGoodsReceivers = grid.getCommercialZones().size();
+        int numLifestyleReceivers = grid.getHousingZones().size();
 
-        // Nüfus dağıtımı (Industrial ve Commercial binalarına sırayla birer birer)
-        while (totalPopulationPool > 0 && (!industrialZones.isEmpty() || !commercialZones.isEmpty())) {
-            boolean distributedAny = false;
-            
-            for (Industrial ind : industrialZones) {
-                if (totalPopulationPool > 0) {
-                    ind.setPopulationReceived(ind.getPopulationReceived() + 1);
-                    totalPopulationPool--;
-                    distributedAny = true;
-                }
-            }
-            for (Commercial com : commercialZones) {
-                if (totalPopulationPool > 0) {
-                    com.setPopulationReceived(com.getPopulationReceived() + 1);
-                    totalPopulationPool--;
-                    distributedAny = true;
-                }
-            }
-            
-            if (!distributedAny) break; 
-        }
+        // Eşit bölme yapıyoruz, kalan atılıyor
+        int populationPerZone = numPopReceivers > 0 ? totalPopulationPool / numPopReceivers : 0;
+        int goodsPerZone = numGoodsReceivers > 0 ? totalGoodsPool / numGoodsReceivers : 0;
+        int lifestylePerZone = numLifestyleReceivers > 0 ? totalLifestylePool / numLifestyleReceivers : 0;
 
-        // Malların (Goods) dağıtımı (Sadece Commercial binalarına)
-        while (totalGoodsPool > 0 && !commercialZones.isEmpty()) {
-            boolean distributedAny = false;
-            
-            for (Commercial com : commercialZones) {
-                if (totalGoodsPool > 0) {
-                    com.setGoodsReceived(com.getGoodsReceived() + 1);
-                    totalGoodsPool--;
-                    distributedAny = true;
+        // Grid tarama sırasıyla dağıtım yapıyoruz ve yazdırıyoruz
+        for (Zone zone : grid.getAllZones()) {
+            if (zone instanceof Industrial) {
+                if (populationPerZone > 0) {
+                    zone.setPopulationReceived(populationPerZone);
+                    System.out.println("Industrial at (" + zone.getRow() + "," + zone.getCol() + ") received " + populationPerZone + " population");
+                }
+            } else if (zone instanceof Commercial) {
+                if (populationPerZone > 0) {
+                    zone.setPopulationReceived(populationPerZone);
+                    System.out.println("Commercial at (" + zone.getRow() + "," + zone.getCol() + ") received " + populationPerZone + " population");
+                }
+                if (goodsPerZone > 0) {
+                    zone.setGoodsReceived(goodsPerZone);
+                    System.out.println("Commercial at (" + zone.getRow() + "," + zone.getCol() + ") received " + goodsPerZone + " goods");
+                }
+            } else if (zone instanceof Housing) {
+                if (lifestylePerZone > 0) {
+                    zone.setLifestyleReceived(lifestylePerZone);
+                    System.out.println("House at (" + zone.getRow() + "," + zone.getCol() + ") received " + lifestylePerZone + " lifestyle");
                 }
             }
-            
-            if (!distributedAny) break;
-        }
-
-        // Lifestyle dağıtımı (Sadece Housing binalarına)
-        while (totalLifestylePool > 0 && !housingZones.isEmpty()) {
-            boolean distributedAny = false;
-            
-            for (Housing house : housingZones) {
-                if (totalLifestylePool > 0) {
-                    house.setLifestyleReceived(house.getLifestyleReceived() + 1);
-                    totalLifestylePool--;
-                    distributedAny = true;
-                }
-            }
-            
-            if (!distributedAny) break;
         }
     }
 }

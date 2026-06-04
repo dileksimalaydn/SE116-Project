@@ -23,14 +23,10 @@ public class Housing extends Zone {
     public int computeOutput() {
         int m = computeM();
         switch (level) {
-            case 1:
-                return m;
-            case 2:
-                return 2 * m;
-            case 3:
-                return 2 * m + lifestyleReceived;
-            default:
-                return 0;
+            case 1: return m;
+            case 2: return 2 * m;
+            case 3: return 2 * m + lifestyleReceived;
+            default: return 0;
         }
     }
 
@@ -42,14 +38,17 @@ public class Housing extends Zone {
 
     @Override
     public void updateLevel() {
+        int oldLevel = level;
+
         // Herhangi bir utility sifirlanirsa zone hemen level 0'a dusuyor.
         if (electricityReceived == 0 || waterReceived == 0 || internetReceived == 0) {
             level = 0;
             lastTickOutput = computeOutput();
+            printOutput(oldLevel);
             return;
         }
 
-        // 3 utility'de gelirse level 1 sarti tamamdir.
+        // 3 utility de gelirse level 1 sarti tamamdir.
         boolean cond1 = true;
         // Level 2 icin tum servisler lazim.
         boolean cond2 = cond1 && securityCovered && healthCovered && educationCovered;
@@ -58,9 +57,20 @@ public class Housing extends Zone {
 
         level = computeNewLevel(cond1, cond2, cond3);
         lastTickOutput = computeOutput();
+        printOutput(oldLevel);
     }
 
-    // Seviyeyi hesaplayan metod.
+    // Uretim ve seviye degisimini yazdirir
+    private void printOutput(int oldLevel) {
+        if (lastTickOutput > 0) {
+            System.out.println("House at (" + getRow() + "," + getCol() + ") generated " + lastTickOutput + " population");
+        }
+        if (level != oldLevel) {
+            String direction = level > oldLevel ? "levels up" : "levels down";
+            System.out.println("House at (" + getRow() + "," + getCol() + ") " + direction + " from " + oldLevel + " to " + level);
+        }
+    }
+
     // Su anki seviyenin kosulu bozulursa bir asagi, sartlar saglaniyorsa bir yukari hareket eder.
     private int computeNewLevel(boolean cond1, boolean cond2, boolean cond3) {
         boolean meetsCurrentLevel;
@@ -77,15 +87,9 @@ public class Housing extends Zone {
         }
 
         // Bir uste cikilabilir mi?
-        if (level == 0 && cond1) {
-            return 1;
-        }
-        if (level == 1 && cond2) {
-            return 2;
-        }
-        if (level == 2 && cond3) {
-            return 3;
-        }
+        if (level == 0 && cond1) return 1;
+        if (level == 1 && cond2) return 2;
+        if (level == 2 && cond3) return 3;
         return level;
     }
 }

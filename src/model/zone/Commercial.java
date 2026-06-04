@@ -23,14 +23,10 @@ public class Commercial extends Zone {
     public int computeOutput() {
         int m = computeM();
         switch (level) {
-            case 1:
-                return m;
-            case 2:
-                return 2 * m;
-            case 3:
-                return 2 * m + Math.min(populationReceived, goodsReceived);
-            default:
-                return 0;
+            case 1: return m;
+            case 2: return 2 * m;
+            case 3: return 2 * m + Math.min(populationReceived, goodsReceived);
+            default: return 0;
         }
     }
 
@@ -42,56 +38,56 @@ public class Commercial extends Zone {
 
     @Override
     public void updateLevel() {
+        int oldLevel = level;
+
         // Utility kesilirse direkt sifira duser.
         if (electricityReceived == 0 || waterReceived == 0 || internetReceived == 0) {
             level = 0;
             lastTickOutput = computeOutput();
+            printOutput(oldLevel);
             return;
         }
 
-        // Level 1 icin nufus + goods gelmeli.
-        boolean cond1 = populationReceived > 0 && goodsReceived > 0;
-        // Level 2 icin guvenlik de gerekli.
+        // Level 1 icin sadece 3 utility yeterli
+        boolean cond1 = electricityReceived > 0 && waterReceived > 0 && internetReceived > 0;
+        // Level 2 icin guvenlik de gerekli
         boolean cond2 = cond1 && securityCovered;
-        // Level 3 icin kaynaklar gelmeye devam etmeli.
+        // Level 3 icin nufus ve goods gelmeli
         boolean cond3 = cond2 && populationReceived > 0 && goodsReceived > 0;
 
         level = computeNewLevel(cond1, cond2, cond3);
         lastTickOutput = computeOutput();
+        printOutput(oldLevel);
+    }
+
+    // Uretim ve seviye degisimini yazdirir
+    private void printOutput(int oldLevel) {
+        if (lastTickOutput > 0) {
+            System.out.println("Commercial at (" + getRow() + "," + getCol() + ") generated " + lastTickOutput + " lifestyle");
+        }
+        if (level != oldLevel) {
+            String direction = level > oldLevel ? "levels up" : "levels down";
+            System.out.println("Commercial at (" + getRow() + "," + getCol() + ") " + direction + " from " + oldLevel + " to " + level);
+        }
     }
 
     private int computeNewLevel(boolean cond1, boolean cond2, boolean cond3) {
         boolean meetsCurrentLevel;
         switch (level) {
-            case 0:
-                meetsCurrentLevel = true;
-                break;
-            case 1:
-                meetsCurrentLevel = cond1;
-                break;
-            case 2:
-                meetsCurrentLevel = cond2;
-                break;
-            case 3:
-                meetsCurrentLevel = cond3;
-                break;
-            default:
-                meetsCurrentLevel = false;
+            case 0: meetsCurrentLevel = true; break;
+            case 1: meetsCurrentLevel = cond1; break;
+            case 2: meetsCurrentLevel = cond2; break;
+            case 3: meetsCurrentLevel = cond3; break;
+            default: meetsCurrentLevel = false;
         }
 
         if (!meetsCurrentLevel) {
             return level - 1;
         }
 
-        if (level == 0 && cond1) {
-            return 1;
-        }
-        if (level == 1 && cond2) {
-            return 2;
-        }
-        if (level == 2 && cond3) {
-            return 3;
-        }
+        if (level == 0 && cond1) return 1;
+        if (level == 1 && cond2) return 2;
+        if (level == 2 && cond3) return 3;
         return level;
     }
 }

@@ -1,6 +1,5 @@
 package simulation;
 
-import io.SimulationPrinter;
 import model.zone.Zone;
 
 // Simulasyonun ana akisini yoneten class
@@ -23,36 +22,28 @@ public class Simulation {
     }
 
     // verilen tick sayisi kadar calistirir
-   public void run(int tickCount) {
-    for (int i = 0; i < tickCount; i++) {
-
-        runOneTick();
-
-        SimulationPrinter.printTick(
-                grid,
-                currentTick
-        );
+    public void run(int tickCount) {
+        for (int i = 0; i < tickCount; i++) {
+            runOneTick();
+        }
     }
-}
 
     // Tek bir tick calistirir
     public void runOneTick() {
         currentTick++;
+        System.out.println("Tick " + currentTick);
 
         resetZones();
 
         ServiceDistributor.distribute(grid);
-
         UtilityDistributor.distribute(grid);
-
         ResourceDistributor.distribute(grid);
 
         updateZones();
-
         computeOutputs();
     }
 
-    //  Eski verileri temizler
+    // Eski verileri temizler
     private void resetZones() {
         for (Zone zone : grid.getAllZones()) {
             zone.resetTickData();
