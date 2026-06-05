@@ -1,3 +1,8 @@
+// Simulasyon sirasinda grid'i yazdirmak icin yaptik fakat su an gerek kalmadi.
+// Son duzenleme ve revizelerimizden sonra gerekli olmadigini fark ettik.
+// Bu sebeple yorum icine aldik tum sinifi.
+
+/*
 package io;
 
 import model.Cell;
@@ -40,3 +45,4 @@ public class SimulationPrinter {
         return "" + cell.getSymbol() + " ";
     }
 }
+*/

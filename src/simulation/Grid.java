@@ -119,6 +119,10 @@ public class Grid {
         return list;
     }
 
+    // ServiceDistributor direk getServiceProviders() kullandigi icin cagrilmiyor.
+    //Dolayisiyla gerek kalmiyor bu kisma ve bu sebeple yorum satirina cevirdik.
+
+    /*
     public List<PoliceStation> getPoliceStations() {
         List<PoliceStation> list = new ArrayList<>();
         for (int r = 0; r < rows; r++)
@@ -145,4 +149,5 @@ public class Grid {
                     list.add((School) cells[r][c]);
         return list;
     }
+    */
 }
